@@ -131,6 +131,16 @@ void Actor::set_max_look_angle(
   m_max_look_angle = p_angle;
 }
 
+void Actor::set_head_node(
+    NodePath const & p_head)
+{
+  m_head_node_path = p_head;
+}
+
+NodePath Actor::get_head_node() const
+{
+  return m_head_node_path;
+}
 
 void Actor::jump()
 {
@@ -144,6 +154,7 @@ void Actor::look_up(
     float const p_delta)
 {
   adjust_in_range(-m_max_look_angle, m_max_look_angle, p_delta, &m_look_angle);
+  _update_head();
 }
 
 float Actor::get_look_angle() const
@@ -156,6 +167,7 @@ void Actor::set_look_angle(
     float const p_angle)
 {
   m_look_angle = in_range(-m_max_look_angle, m_max_look_angle, p_angle);
+  _update_head();
 }
 
 
@@ -192,6 +204,9 @@ void Actor::_bind_methods()
   ClassDB::bind_method(D_METHOD("has_air_control"), &Actor::has_air_control);
   ClassDB::bind_method(D_METHOD("set_air_control", "enabled"), &Actor::set_air_control);
 
+  ClassDB::bind_method(D_METHOD("get_head_node"), &Actor::get_head_node);
+  ClassDB::bind_method(D_METHOD("set_head_node", "node_path"), &Actor::set_head_node);
+
   ClassDB::bind_method(D_METHOD("jump"), &Actor::jump);
   ClassDB::bind_method(D_METHOD("look_up", "delta"), &Actor::look_up);
 
@@ -203,6 +218,8 @@ void Actor::_bind_methods()
       "0.1,100.0"), "set_max_look_angle", "get_max_look_angle");
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "air_control"), \
       "set_air_control", "has_air_control");
+	ADD_PROPERTY(PropertyInfo(Variant::NODE_PATH, "head_node", \
+      PROPERTY_HINT_NODE_PATH_VALID_TYPES, "Spatial"), "set_head_node", "get_head_node");
 }
 
 
@@ -253,5 +270,12 @@ void Actor::_notification(
   }
 }
 
+void Actor::_update_head()
+{
+  Spatial * head_node = Object::cast_to<Spatial>(get_node(get_head_node()));
 
+  if (head_node != nullptr) {
+    head_node->set_rotation(Vector3(m_look_angle, 0, 0));
+  }
+}
 

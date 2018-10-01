@@ -45,6 +45,11 @@ class Actor : public KinematicBody
   void set_max_look_angle(
       float p_angle);
 
+  void set_head_node(
+      NodePath const & p_head);
+
+  NodePath get_head_node() const;
+
   void jump();
 
   void look_up(
@@ -63,11 +68,14 @@ class Actor : public KinematicBody
     void _notification(
         int notification);
 
+    void _update_head();
+
   private:
     bool m_air_control;
     float m_run_speed;
     float m_jump_speed;
     float m_max_look_angle;
+    NodePath m_head_node_path;
 
     // state variables
     Vector3 m_velocity;
