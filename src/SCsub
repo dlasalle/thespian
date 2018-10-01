@@ -9,15 +9,17 @@ sources = glob.glob("*.cpp")
 env_thespian = env.Clone()
 env_thespian.Append(CXXCFLAGS=["-O2", "-std=c++11", "-Werror", "-Wall"])
 
-if ARGUMENTS.get("thespian_shared", "yes") == "yes":
+if ARGUMENTS.get("thespian_shared", "no") == "yes":
     env_thespian.Append(CXXFLAGS="-fPIC")
+
+    env_thespian["LIBS"] = []
 
     shared_lib = env_thespian.SharedLibrary(target="#bin/thespian", source=sources)
 
 
     shared_lib_shim = shared_lib[0].name.rsplit(".", 1)[0]
-    env_thespian.Append(LIBS=[shared_lib_shim])
-    env_thespian.Append(LIBPATH="#bin")
+    env.Append(LIBS=[shared_lib_shim])
+    env.Append(LIBPATH="#bin")
 
 else:
     env_thespian.add_source_files(env.modules_sources, sources)

@@ -7,11 +7,10 @@
  * @date 2018-02-23
  */
 
-
-#include "register_types.h"
-#include "class_db.h"
-
 #include "Actor.hpp"
+#include "register_types.h"
+
+#include "core/class_db.h"
 
 void register_thespian_types()
 {

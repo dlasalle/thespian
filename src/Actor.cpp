@@ -13,6 +13,8 @@
 #include "core/math/math_funcs.h"
 #include "core/math/math_defs.h"
 
+#include <algorithm>
+
 
 /******************************************************************************
 * HELPER FUNCTIONS ************************************************************
@@ -193,11 +195,11 @@ void Actor::_bind_methods()
   ClassDB::bind_method(D_METHOD("jump"), &Actor::jump);
   ClassDB::bind_method(D_METHOD("look_up", "delta"), &Actor::look_up);
 
-	ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "run_speed", PROPERTY_HINT_RANGE, \
+	ADD_PROPERTY(PropertyInfo(Variant::REAL, "run_speed", PROPERTY_HINT_RANGE, \
       "0.1,100.0"), "set_run_speed", "get_run_speed");
-	ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "jump_speed", PROPERTY_HINT_RANGE, \
+	ADD_PROPERTY(PropertyInfo(Variant::REAL, "jump_speed", PROPERTY_HINT_RANGE, \
       "0.1,100.0"), "set_jump_speed", "get_jump_speed");
-	ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "max_look_angle", PROPERTY_HINT_RANGE, \
+	ADD_PROPERTY(PropertyInfo(Variant::REAL, "max_look_angle", PROPERTY_HINT_RANGE, \
       "0.1,100.0"), "set_max_look_angle", "get_max_look_angle");
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "air_control"), \
       "set_air_control", "has_air_control");
@@ -214,10 +216,13 @@ void Actor::_notification(
   switch (p_notification)
   {
     case NOTIFICATION_PHYSICS_PROCESS: {
+      Transform trans = get_global_transform();
+      trans.set_origin(Vector3(0,0,0));
+      Vector3 relative_motion = trans.xform(Vector3(m_motion.x, 0, m_motion.y));
       // update position
       if (is_on_floor() || has_air_control()) {
-        m_velocity.x = m_motion.x*m_run_speed;
-        m_velocity.z = m_motion.y*m_jump_speed;
+        m_velocity.x = relative_motion.x*m_run_speed;
+        m_velocity.z = relative_motion.z*m_run_speed;
       }
 
       // handle gravity

@@ -67,6 +67,7 @@ class Actor : public KinematicBody
     bool m_air_control;
     float m_run_speed;
     float m_jump_speed;
+    float m_max_look_angle;
 
     // state variables
     Vector3 m_velocity;
