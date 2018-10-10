@@ -13,6 +13,19 @@
 
 #include "scene/3d/physics_body.h"
 
+class ActorSignals
+{
+  public:
+  static ActorSignals * get_singleton();
+
+  StringName jumped_signal = StaticCString::create("sig_jumped");
+
+  private:
+  static ActorSignals * m_singleton;
+};
+
+
+
 class Actor : public KinematicBody
 {
   GDCLASS(Actor, KinematicBody);

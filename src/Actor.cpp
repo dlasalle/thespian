@@ -45,6 +45,21 @@ void adjust_in_range(
 
 }
 
+/******************************************************************************
+* PUBLIC STATIC METHODS *******************************************************
+******************************************************************************/
+
+ActorSignals * ActorSignals::m_singleton = nullptr;
+
+ActorSignals * ActorSignals::get_singleton()
+{
+  if (m_singleton == nullptr) {
+    m_singleton = new ActorSignals;
+  }
+
+  return m_singleton;
+}
+
 
 /******************************************************************************
 * CONSTRUCTORS / DESTRUCTOR ***************************************************
@@ -235,7 +250,7 @@ void Actor::_notification(
     case NOTIFICATION_PHYSICS_PROCESS: {
       Transform trans = get_global_transform();
       trans.set_origin(Vector3(0,0,0));
-      Vector3 relative_motion = trans.xform(Vector3(m_motion.x, 0, m_motion.y));
+      Vector3 const relative_motion = trans.xform(Vector3(m_motion.x, 0, m_motion.y));
       // update position
       if (is_on_floor() || has_air_control()) {
         m_velocity.x = relative_motion.x*m_run_speed;
@@ -251,10 +266,9 @@ void Actor::_notification(
       // handle jump
       if (is_on_floor()) {
         if (m_jumping) {
+          emit_signal(ActorSignals::get_singleton()->jumped_signal);
           m_jumping = false;
           m_velocity.y += m_jump_speed;
-        } else {
-          m_velocity.y = 0;
         }
       }
 

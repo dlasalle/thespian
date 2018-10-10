@@ -8,5 +8,5 @@
  */
 
 
-void register_thespian_types();
-void unregister_thespian_types();
+void register_actors_types();
+void unregister_actors_types();
