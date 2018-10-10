@@ -12,12 +12,12 @@
 
 #include "core/class_db.h"
 
-void register_actors_types()
+void register_thespian_types()
 {
   ClassDB::register_class<Actor>();
 }
 
-void unregister_actors_types()
+void unregister_thespian_types()
 {
   // nothing to do
 }
