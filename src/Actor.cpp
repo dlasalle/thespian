@@ -66,10 +66,13 @@ ActorSignals * ActorSignals::get_singleton()
 ******************************************************************************/
 
 Actor::Actor() :
+  m_display_name(),
   m_air_control(false),
   m_run_speed(1.0),
   m_jump_speed(1.0),
   m_max_look_angle(Math_PI/2.0),
+  m_head_node_path(),
+  m_air_resistance(0.0),
   m_velocity(0, 0, 0),
   m_motion(0, 0),
   m_jumping(false),
@@ -82,6 +85,17 @@ Actor::Actor() :
 /******************************************************************************
 * PUBLIC METHODS **************************************************************
 ******************************************************************************/
+
+String Actor::get_display_name() const
+{
+  return m_display_name;
+}
+
+void Actor::set_display_name(
+    String const p_name)
+{
+  m_display_name = p_name;
+}
 
 void Actor::set_motion(
     Vector2 const p_motion)
@@ -165,6 +179,19 @@ void Actor::jump()
 }
 
 
+float Actor::get_air_resistance() const
+{
+  return m_air_resistance;
+}
+
+
+void Actor::set_air_resistance(
+    float const p_resistance) const
+{
+  m_air_resistance = p_resistance;
+}
+
+
 void Actor::look_up(
     float const p_delta)
 {
@@ -200,6 +227,9 @@ Transform Actor::get_look_transform() const
 
 void Actor::_bind_methods()
 {
+  ClassDB::bind_method(D_METHOD("get_display_name"), &Actor::get_display_name);
+  ClassDB::bind_method(D_METHOD("set_display_name", "display_name"), &Actor::set_display_name);
+
   ClassDB::bind_method(D_METHOD("get_motion"), &Actor::get_motion);
   ClassDB::bind_method(D_METHOD("set_motion", "motion"), &Actor::set_motion);
 
@@ -219,12 +249,19 @@ void Actor::_bind_methods()
   ClassDB::bind_method(D_METHOD("has_air_control"), &Actor::has_air_control);
   ClassDB::bind_method(D_METHOD("set_air_control", "enabled"), &Actor::set_air_control);
 
+  ClassDB::bind_method(D_METHOD("get_air_resistance"), &Actor::has_air_resistance);
+  ClassDB::bind_method(D_METHOD("set_air_resistance", "resistance"), &Actor::set_air_resistance);
+
   ClassDB::bind_method(D_METHOD("get_head_node"), &Actor::get_head_node);
   ClassDB::bind_method(D_METHOD("set_head_node", "node_path"), &Actor::set_head_node);
 
   ClassDB::bind_method(D_METHOD("jump"), &Actor::jump);
   ClassDB::bind_method(D_METHOD("look_up", "delta"), &Actor::look_up);
 
+	ADD_SIGNAL(MethodInfo(ActorSignals::get_singleton()->jumped_signal));
+
+	ADD_PROPERTY(PropertyInfo(Variant::STRING, "display_name"), \
+      "set_display_name", "get_display_name");
 	ADD_PROPERTY(PropertyInfo(Variant::REAL, "run_speed", PROPERTY_HINT_RANGE, \
       "0.1,100.0"), "set_run_speed", "get_run_speed");
 	ADD_PROPERTY(PropertyInfo(Variant::REAL, "jump_speed", PROPERTY_HINT_RANGE, \
@@ -233,8 +270,9 @@ void Actor::_bind_methods()
       "0.1,100.0"), "set_max_look_angle", "get_max_look_angle");
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "air_control"), \
       "set_air_control", "has_air_control");
-	ADD_PROPERTY(PropertyInfo(Variant::NODE_PATH, "head_node", \
-      PROPERTY_HINT_NODE_PATH_VALID_TYPES, "Spatial"), "set_head_node", "get_head_node");
+	ADD_PROPERTY(PropertyInfo(Variant::REAL, "air_resistance"), \
+      "set_air_resistance", "get_air_resistance");
+	ADD_PROPERTY(PropertyInfo(Variant::NODE_PATH, "head_node"), "set_head_node", "get_head_node");
 }
 
 

@@ -33,6 +33,11 @@ class Actor : public KinematicBody
   public:
   Actor();
 
+  String get_display_name() const;
+
+  void set_display_name(
+      String p_name);
+
   void set_motion(
       Vector2 p_motion);
 
@@ -63,6 +68,11 @@ class Actor : public KinematicBody
 
   NodePath get_head_node() const;
 
+  float get_air_resistance() const;
+
+  void set_air_resistance(
+      float resistance) const;
+
   void jump();
 
   void look_up(
@@ -84,11 +94,13 @@ class Actor : public KinematicBody
     void _update_head();
 
   private:
+    String m_display_name;
     bool m_air_control;
     float m_run_speed;
     float m_jump_speed;
     float m_max_look_angle;
     NodePath m_head_node_path;
+    float m_air_resistance;
 
     // state variables
     Vector3 m_velocity;
