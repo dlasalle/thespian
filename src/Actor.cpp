@@ -60,6 +60,16 @@ ActorSignals * ActorSignals::get_singleton()
   return m_singleton;
 }
 
+ActorSignals::ActorSignals() :
+    jumped_signal(StaticCString::create("sig_jumped")),
+    start_running_signal(StaticCString::create("sig_start_run")),
+    stop_running_signal(StaticCString::create("sig_stop_run"))
+{
+  // do nothing
+}
+
+
+
 
 /******************************************************************************
 * CONSTRUCTORS / DESTRUCTOR ***************************************************
@@ -76,7 +86,8 @@ Actor::Actor() :
   m_velocity(0, 0, 0),
   m_motion(0, 0),
   m_jumping(false),
-  m_look_angle(0)
+  m_look_angle(0),
+  m_is_running(false)
 {
   // do nothing
 }
@@ -186,7 +197,7 @@ float Actor::get_air_resistance() const
 
 
 void Actor::set_air_resistance(
-    float const p_resistance) const
+    float const p_resistance)
 {
   m_air_resistance = p_resistance;
 }
@@ -249,7 +260,7 @@ void Actor::_bind_methods()
   ClassDB::bind_method(D_METHOD("has_air_control"), &Actor::has_air_control);
   ClassDB::bind_method(D_METHOD("set_air_control", "enabled"), &Actor::set_air_control);
 
-  ClassDB::bind_method(D_METHOD("get_air_resistance"), &Actor::has_air_resistance);
+  ClassDB::bind_method(D_METHOD("get_air_resistance"), &Actor::get_air_resistance);
   ClassDB::bind_method(D_METHOD("set_air_resistance", "resistance"), &Actor::set_air_resistance);
 
   ClassDB::bind_method(D_METHOD("get_head_node"), &Actor::get_head_node);
@@ -259,6 +270,8 @@ void Actor::_bind_methods()
   ClassDB::bind_method(D_METHOD("look_up", "delta"), &Actor::look_up);
 
 	ADD_SIGNAL(MethodInfo(ActorSignals::get_singleton()->jumped_signal));
+	ADD_SIGNAL(MethodInfo(ActorSignals::get_singleton()->start_running_signal));
+	ADD_SIGNAL(MethodInfo(ActorSignals::get_singleton()->stop_running_signal));
 
 	ADD_PROPERTY(PropertyInfo(Variant::STRING, "display_name"), \
       "set_display_name", "get_display_name");
@@ -286,6 +299,8 @@ void Actor::_notification(
   switch (p_notification)
   {
     case NOTIFICATION_PHYSICS_PROCESS: {
+      float const delta = get_physics_process_delta_time();
+
       Transform trans = get_global_transform();
       trans.set_origin(Vector3(0,0,0));
       Vector3 const relative_motion = trans.xform(Vector3(m_motion.x, 0, m_motion.y));
@@ -295,11 +310,32 @@ void Actor::_notification(
         m_velocity.z = relative_motion.z*m_run_speed;
       }
 
+      // update running status
+      if (!m_is_running) {
+        if (is_on_floor() && m_motion.length() > 0) {
+          m_is_running = true;
+          emit_signal(ActorSignals::get_singleton()->start_running_signal);
+        }
+      } else {
+        if (!is_on_floor() || m_motion.length() == 0) {
+          m_is_running = false;
+          emit_signal(ActorSignals::get_singleton()->stop_running_signal);
+        }
+      }
+
       // handle gravity
       PhysicsDirectBodyState * const state = \
           PhysicsServer::get_singleton()->body_get_direct_state(get_rid());
       Vector3 const gravity = state->get_total_gravity();
-      m_velocity += gravity*get_physics_process_delta_time();
+      m_velocity += gravity*delta;
+      if (!is_on_floor() && m_air_resistance > 0) {
+        // handle air resistance
+        float const v = m_velocity.length();
+        // crude approximation of wind resistance which results in a terminal
+        // of around 53 m/s (that of a human) for 1.0
+        float const drag = 0.5 * v*v * 0.007 * m_air_resistance;
+        m_velocity -= m_velocity.normalized()*drag*delta;
+      }
 
       // handle jump
       if (is_on_floor()) {
@@ -311,8 +347,8 @@ void Actor::_notification(
       }
 
       // update velocity 
-      m_velocity = move_and_slide(m_velocity, Vector3(0, 1, 0), 0.05, 2, \
-          Math::deg2rad(55.0));
+      m_velocity = move_and_slide(m_velocity, Vector3(0, 1, 0), true, 4, \
+          Math::deg2rad(55.0), false);
       if (this->is_on_floor()) {
         m_velocity = Vector3(0, 0, 0);
       }

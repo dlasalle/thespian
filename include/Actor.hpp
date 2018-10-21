@@ -18,7 +18,10 @@ class ActorSignals
   public:
   static ActorSignals * get_singleton();
 
-  StringName jumped_signal = StaticCString::create("sig_jumped");
+  StringName jumped_signal;
+  StringName start_running_signal;
+  StringName stop_running_signal;
+  ActorSignals();
 
   private:
   static ActorSignals * m_singleton;
@@ -71,7 +74,7 @@ class Actor : public KinematicBody
   float get_air_resistance() const;
 
   void set_air_resistance(
-      float resistance) const;
+      float resistance);
 
   void jump();
 
@@ -107,6 +110,7 @@ class Actor : public KinematicBody
     Vector2 m_motion;
     bool m_jumping;
     float m_look_angle;
+    bool m_is_running;
  
 };
 
