@@ -7,14 +7,16 @@
  * @date 2018-02-23
  */
 
-#include "Actor.hpp"
+#include "GroundActor.hpp"
+//#include "Actor.hpp"
 #include "register_types.h"
 
 #include "core/class_db.h"
 
 void register_thespian_types()
 {
-  ClassDB::register_class<Actor>();
+  //ClassDB::register_class<Actor>();
+  ClassDB::register_class<GroundActor>();
 }
 
 void unregister_thespian_types()
