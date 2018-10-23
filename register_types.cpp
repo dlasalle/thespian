@@ -8,14 +8,12 @@
  */
 
 #include "GroundActor.hpp"
-//#include "Actor.hpp"
 #include "register_types.h"
 
 #include "core/class_db.h"
 
 void register_thespian_types()
 {
-  //ClassDB::register_class<Actor>();
   ClassDB::register_class<GroundActor>();
 }
 

@@ -6,16 +6,16 @@ Import('env')
 
 sources = glob.glob("src/*.cpp") + ["register_types.cpp"]
 
-env_actors = env.Clone()
-env_actors.Append(CXXCFLAGS=["-Iinclude/", "-O2", "-std=c++11", "-Werror", "-Wall"])
-env_actors.Append(CPPPATH=["include"])
+env_thespian = env.Clone()
+env_thespian.Append(CXXCFLAGS=["-Iinclude/", "-O2", "-std=c++11", "-Werror", "-Wall"])
+env_thespian.Append(CPPPATH=["include"])
 
-if ARGUMENTS.get("actors_shared", "no") == "yes":
-    env_actors.Append(CXXFLAGS="-fPIC")
+if ARGUMENTS.get("thespian_shared", "no") == "yes":
+    env_thespian.Append(CXXFLAGS="-fPIC")
 
-    env_actors["LIBS"] = []
+    env_thespian["LIBS"] = []
 
-    shared_lib = env_actors.SharedLibrary(target="#bin/actors", source=sources)
+    shared_lib = env_thespian.SharedLibrary(target="#bin/thespian", source=sources)
 
 
     shared_lib_shim = shared_lib[0].name.rsplit(".", 1)[0]
@@ -23,4 +23,4 @@ if ARGUMENTS.get("actors_shared", "no") == "yes":
     env.Append(LIBPATH="#bin")
 
 else:
-    env_actors.add_source_files(env.modules_sources, sources)
+    env_thespian.add_source_files(env.modules_sources, sources)
