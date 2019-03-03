@@ -210,7 +210,7 @@ void GroundActor::_notification(
       // update position
       if (is_on_floor() || has_air_control()) {
         Vector3 const velocity( \
-            relative_motion.x*m_run_speed, 0, relative_motion.z*m_run_speed);
+            relative_motion.x*m_run_speed, get_velocity().y, relative_motion.z*m_run_speed);
         set_velocity(velocity);
       }
 
